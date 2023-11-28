@@ -1,9 +1,8 @@
 #include <M5StickCPlus.h>
-#include <Audio.h>
 
 #define ANALOG_PIN 33   // アナログセンサーのピン番号
-#define LED_PIN 32      // LEDのデジタルピン番号
-#define THRESHOLD 700   // 閾値
+#define LED_PIN 32      // LEDのPWMピン番号
+#define PWMCH 1         // PWMチャンネル番号
 
 // 関数の宣言
 void drawMeter(int value);
@@ -11,6 +10,8 @@ void drawMeter(int value);
 void setup() {
   M5.begin();
   pinMode(LED_PIN, OUTPUT);
+  ledcSetup(PWMCH, 12000, 8);
+  ledcAttachPin(LED_PIN, PWMCH);
 }
 
 void loop() {
@@ -21,12 +22,8 @@ void loop() {
   drawMeter(sensorValue);
 
   // LEDの制御
-  if (sensorValue > THRESHOLD) {
-    digitalWrite(LED_PIN, HIGH);  // 閾値を超えたらLED点灯
-  } else {
-    digitalWrite(LED_PIN, LOW);   // 閾値を下回ったらLED消灯
-  }
-
+  int brightness = map(sensorValue, 0, 4095, 0, 256);
+  ledcWrite(PWMCH, brightness);
   delay(100);
 }
 
